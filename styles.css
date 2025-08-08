@@ -1,0 +1,52 @@
+:root {
+  --bg: #0f172a;
+  --panel: #111827;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --accent: #60a5fa;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app { max-width: 1100px; margin: 0 auto; padding: 16px; }
+
+header { margin-bottom: 10px; }
+header h1 { margin: 0 0 4px 0; font-weight: 650; font-size: 22px; }
+header p { margin: 0; color: var(--muted); font-size: 14px; }
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid #1f2937;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 10px 0 14px 0;
+}
+
+.control { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; }
+.control label { color: var(--muted); font-size: 13px; grid-column: 1 / -1; }
+.control input[type="range"] { width: 100%; }
+.control output { min-width: 48px; text-align: right; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+.map-wrap { background: #0b1220; border: 1px solid #1f2937; border-radius: 8px; overflow: hidden; }
+.map { width: 100%; height: min(70vh, 780px); }
+
+svg { width: 100%; height: 100%; display: block; }
+
+.states path { fill: #0d1b2a; stroke: #334155; stroke-width: 0.75; }
+
+.cluster circle { fill: #60a5fa; fill-opacity: 0.25; stroke: #93c5fd; stroke-width: 1.5; }
+.cluster text { fill: #e5e7eb; font-weight: 650; pointer-events: none; }
+
+footer { margin-top: 12px; color: var(--muted); }
+
+

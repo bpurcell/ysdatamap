@@ -1,0 +1,20 @@
+Address,"Country ",State,City,New customer records,Latitude,Longitude
+"NewYorkCity, NY",US,NY,New York City,458,40.7127281,-74.0060152
+"LosAngeles, CA",US,CA,Los Angeles,388,34.0802852,-118.3617435
+"Brooklyn, NY",US,NY,Brooklyn,351,40.6526006,-73.9497211
+"Chicago, IL",US,IL,Chicago,329,41.8958413,-87.6356943
+"WashingtonDC, DC",US,DC,Washington DC,245,38.8950368,-77.0365427
+"Houston, TX",US,TX,Houston,230,29.767579,-95.3674625
+"Atlanta, GA",US,GA,Atlanta,148,33.7993702,-84.3926489
+"SanDiego, CA",US,CA,San Diego,147,32.7481447,-117.1580989
+"Seattle, WA",US,WA,Seattle,140,47.6134905,-122.35349
+"Charlotte, NC",US,NC,Charlotte,136,35.2412292,-80.8226636
+"SanFrancisco, CA",US,CA,San Francisco,134,37.7792588,-122.4193286
+"Miami, FL",US,FL,Miami,128,25.8494759,-80.2579786
+"Austin, TX",US,TX,Austin,124,30.269586,-97.7569927
+"Dallas, TX",US,TX,Dallas,123,32.7762719,-96.7968559
+"SanAntonio, TX",US,TX,San Antonio,115,29.4241874,-98.5945257
+"Philadelphia, PA",US,PA,Philadelphia,111,39.9527237,-75.1635262
+"Alexandria, VA",US,VA,Alexandria,108,38.8064356,-77.062224
+"LasVegas, NV",US,NV,Las Vegas,93,36.1674263,-115.1484131
+"Phoenix, AZ",US,AZ,Phoenix,92,33.4328486,-112.0067915

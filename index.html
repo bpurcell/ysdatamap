@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Customer Clusters Map</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <h1>Customer Clusters Map</h1>
+        <p>Grid-based clustering of customer records across the U.S.</p>
+      </header>
+
+      <section class="controls" aria-label="Clustering controls">
+        <div class="control">
+          <label for="gridSize">Grid size (px)</label>
+          <input id="gridSize" type="range" min="10" max="120" step="2" value="40" />
+          <output id="gridSizeValue" for="gridSize">40</output>
+        </div>
+        <div class="control">
+          <label for="scaleMultiplier">Cluster scale</label>
+          <input id="scaleMultiplier" type="range" min="0.5" max="3" step="0.1" value="1.2" />
+          <output id="scaleMultiplierValue" for="scaleMultiplier">1.2×</output>
+        </div>
+        <div class="control">
+          <label for="minCluster">Minimum cluster sum</label>
+          <input id="minCluster" type="range" min="1" max="500" step="1" value="1" />
+          <output id="minClusterValue" for="minCluster">1+</output>
+        </div>
+      </section>
+
+      <section class="map-wrap">
+        <div id="map" class="map" role="img" aria-label="US map with clustered customer data"></div>
+      </section>
+
+      <footer>
+        <small>
+          Use the sliders to adjust clustering. Pan and zoom to explore. Data from <code>datall.csv</code>.
+        </small>
+      </footer>
+    </div>
+
+    <script src="./map.js"></script>
+  </body>
+  </html>
+
+
