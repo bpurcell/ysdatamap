@@ -24,6 +24,13 @@
     minSum: 1,
     transform: d3.zoomIdentity,
     data: [],
+    // Visual customization defaults
+    mapBgColor: '#0b1220',
+    stateFillColor: '#0d1b2a',
+    stateStrokeColor: '#334155',
+    clusterFillColor: '#60a5fa',
+    clusterStrokeColor: '#93c5fd',
+    clusterTextSize: 14,
   };
 
   // Controls wiring
@@ -34,10 +41,20 @@
   const minClusterEl = document.getElementById('minCluster');
   const minClusterValueEl = document.getElementById('minClusterValue');
 
+  // Visual controls
+  const mapBgEl = document.getElementById('mapBgColor');
+  const stateFillEl = document.getElementById('stateFillColor');
+  const stateStrokeEl = document.getElementById('stateStrokeColor');
+  const clusterFillEl = document.getElementById('clusterFillColor');
+  const clusterStrokeEl = document.getElementById('clusterStrokeColor');
+  const clusterTextSizeEl = document.getElementById('clusterTextSize');
+  const clusterTextSizeValueEl = document.getElementById('clusterTextSizeValue');
+
   function syncControlLabels() {
     gridSizeValueEl.textContent = String(state.gridSize);
     scaleValueEl.textContent = `${Number(state.scaleMultiplier).toFixed(1)}×`;
     minClusterValueEl.textContent = `${state.minSum}+`;
+    if (clusterTextSizeValueEl) clusterTextSizeValueEl.textContent = `${state.clusterTextSize}px`;
   }
 
   gridSizeEl.addEventListener('input', () => {
@@ -57,6 +74,67 @@
     syncControlLabels();
     renderClusters();
   });
+
+  function applyStyleOptions() {
+    // Background
+    const wrap = document.querySelector('.map-wrap');
+    if (wrap) {
+      wrap.style.background = state.mapBgColor;
+    }
+
+    // States style
+    gStates
+      .selectAll('path')
+      .style('fill', state.stateFillColor)
+      .style('stroke', state.stateStrokeColor);
+
+    // Cluster styles
+    gClusters
+      .selectAll('circle')
+      .style('fill', state.clusterFillColor)
+      .style('stroke', state.clusterStrokeColor)
+      .attr('fill-opacity', 0.25);
+
+    gClusters
+      .selectAll('text')
+      .style('font-size', `${state.clusterTextSize}px`);
+  }
+
+  // Visual controls listeners
+  if (mapBgEl) mapBgEl.addEventListener('input', () => {
+    state.mapBgColor = mapBgEl.value;
+    applyStyleOptions();
+  });
+  if (stateFillEl) stateFillEl.addEventListener('input', () => {
+    state.stateFillColor = stateFillEl.value;
+    applyStyleOptions();
+  });
+  if (stateStrokeEl) stateStrokeEl.addEventListener('input', () => {
+    state.stateStrokeColor = stateStrokeEl.value;
+    applyStyleOptions();
+  });
+  if (clusterFillEl) clusterFillEl.addEventListener('input', () => {
+    state.clusterFillColor = clusterFillEl.value;
+    applyStyleOptions();
+  });
+  if (clusterStrokeEl) clusterStrokeEl.addEventListener('input', () => {
+    state.clusterStrokeColor = clusterStrokeEl.value;
+    applyStyleOptions();
+  });
+  if (clusterTextSizeEl) clusterTextSizeEl.addEventListener('input', () => {
+    state.clusterTextSize = Number(clusterTextSizeEl.value);
+    syncControlLabels();
+    applyStyleOptions();
+  });
+
+  // Initialize control values to state defaults
+  if (mapBgEl) mapBgEl.value = state.mapBgColor;
+  if (stateFillEl) stateFillEl.value = state.stateFillColor;
+  if (stateStrokeEl) stateStrokeEl.value = state.stateStrokeColor;
+  if (clusterFillEl) clusterFillEl.value = state.clusterFillColor;
+  if (clusterStrokeEl) clusterStrokeEl.value = state.clusterStrokeColor;
+  if (clusterTextSizeEl) clusterTextSizeEl.value = String(state.clusterTextSize);
+  applyStyleOptions();
 
   // Zoom behavior: transform background map group; clusters recomputed in screen space
   const zoom = d3
@@ -90,6 +168,7 @@
     drawStates(statesGeo);
     syncControlLabels();
     renderClusters();
+    applyStyleOptions();
   }).catch(err => {
     console.error('Failed to load data', err);
   });
@@ -100,7 +179,9 @@
       .selectAll('path')
       .data(geojson.features)
       .join('path')
-      .attr('d', geoPath);
+      .attr('d', geoPath)
+      .style('fill', state.stateFillColor)
+      .style('stroke', state.stateStrokeColor);
   }
 
   function renderClusters() {
@@ -145,21 +226,30 @@
     const sel = gClusters.selectAll('g.cluster').data(clusters, d => d.key);
 
     const selEnter = sel.enter().append('g').attr('class', 'cluster');
-    selEnter.append('circle');
-    selEnter.append('text');
+    selEnter
+      .append('circle')
+      .style('fill', state.clusterFillColor)
+      .style('stroke', state.clusterStrokeColor)
+      .attr('fill-opacity', 0.25);
+    selEnter
+      .append('text')
+      .style('font-size', `${state.clusterTextSize}px`);
 
     const selAll = selEnter.merge(sel);
 
     selAll.attr('transform', d => `translate(${d.x},${d.y})`);
 
     selAll.select('circle')
-      .attr('r', d => rScale(d.sum) * state.scaleMultiplier);
+      .attr('r', d => rScale(d.sum) * state.scaleMultiplier)
+      .style('fill', state.clusterFillColor)
+      .style('stroke', state.clusterStrokeColor)
+      .attr('fill-opacity', 0.25);
 
     selAll.select('text')
       .text(d => d.sum)
       .attr('text-anchor', 'middle')
       .attr('dy', '0.35em')
-      .attr('font-size', d => Math.max(9, Math.min(18, rScale(d.sum) * 0.9)));
+      .style('font-size', `${state.clusterTextSize}px`);
 
     sel.exit().remove();
   }
