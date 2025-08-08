@@ -14,6 +14,7 @@
   const gMap = svg.append('g').attr('class', 'map-root');
   const gStates = gMap.append('g').attr('class', 'states');
   const gClusters = svg.append('g').attr('class', 'clusters'); // not zoom-transformed; positions are screen-space with zoom applied at compute time
+  const gRaw = svg.append('g').attr('class', 'raw'); // raw points layer (when clustering is disabled)
 
   const projection = d3.geoAlbersUsa().translate([width / 2, height / 2]).scale(Math.min(width, height) * 1.15);
   const geoPath = d3.geoPath().projection(projection);
@@ -31,6 +32,7 @@
     clusterFillColor: '#60a5fa',
     clusterStrokeColor: '#93c5fd',
     clusterTextSize: 14,
+    showRaw: false,
   };
 
   // Controls wiring
@@ -40,6 +42,7 @@
   const scaleValueEl = document.getElementById('scaleMultiplierValue');
   const minClusterEl = document.getElementById('minCluster');
   const minClusterValueEl = document.getElementById('minClusterValue');
+  const showRawEl = document.getElementById('showRaw');
 
   // Visual controls
   const mapBgEl = document.getElementById('mapBgColor');
@@ -60,19 +63,24 @@
   gridSizeEl.addEventListener('input', () => {
     state.gridSize = Number(gridSizeEl.value);
     syncControlLabels();
-    renderClusters();
+    render();
   });
 
   scaleEl.addEventListener('input', () => {
     state.scaleMultiplier = Number(scaleEl.value);
     syncControlLabels();
-    renderClusters();
+    render();
   });
 
   minClusterEl.addEventListener('input', () => {
     state.minSum = Number(minClusterEl.value);
     syncControlLabels();
-    renderClusters();
+    render();
+  });
+
+  if (showRawEl) showRawEl.addEventListener('change', () => {
+    state.showRaw = showRawEl.checked;
+    render();
   });
 
   function applyStyleOptions() {
@@ -96,6 +104,16 @@
       .attr('fill-opacity', 0.25);
 
     gClusters
+      .selectAll('text')
+      .style('font-size', `${state.clusterTextSize}px`);
+
+    // Raw styles
+    gRaw
+      .selectAll('circle')
+      .style('fill', state.clusterFillColor)
+      .style('stroke', state.clusterStrokeColor)
+      .attr('fill-opacity', 0.25);
+    gRaw
       .selectAll('text')
       .style('font-size', `${state.clusterTextSize}px`);
   }
@@ -134,7 +152,17 @@
   if (clusterFillEl) clusterFillEl.value = state.clusterFillColor;
   if (clusterStrokeEl) clusterStrokeEl.value = state.clusterStrokeColor;
   if (clusterTextSizeEl) clusterTextSizeEl.value = String(state.clusterTextSize);
+  if (showRawEl) showRawEl.checked = state.showRaw;
   applyStyleOptions();
+
+  function render() {
+    if (!state.data.length) return;
+    if (state.showRaw) {
+      renderRaw();
+    } else {
+      renderClusters();
+    }
+  }
 
   // Zoom behavior: transform background map group; clusters recomputed in screen space
   const zoom = d3
@@ -144,7 +172,7 @@
     .on('zoom', (event) => {
       state.transform = event.transform;
       gMap.attr('transform', event.transform);
-      renderClusters();
+      render();
     });
 
   svg.call(zoom);
@@ -167,7 +195,7 @@
     const statesGeo = topojson.feature(us, us.objects.states);
     drawStates(statesGeo);
     syncControlLabels();
-    renderClusters();
+    render();
     applyStyleOptions();
   }).catch(err => {
     console.error('Failed to load data', err);
@@ -186,6 +214,8 @@
 
   function renderClusters() {
     if (!state.data.length) return;
+    // Clear raw layer when clustering is active
+    gRaw.selectAll('*').remove();
 
     const t = state.transform || d3.zoomIdentity;
     const gridSize = Math.max(2, state.gridSize);
@@ -254,6 +284,44 @@
     sel.exit().remove();
   }
 
+  function renderRaw() {
+    if (!state.data.length) return;
+    // Clear clusters layer when raw mode is active
+    gClusters.selectAll('*').remove();
+
+    const t = state.transform || d3.zoomIdentity;
+    const points = [];
+    for (let i = 0; i < state.data.length; i += 1) {
+      const row = state.data[i];
+      const proj = projection([row.lon, row.lat]);
+      if (!proj) continue;
+      const [px, py] = t.apply(proj);
+      points.push({ key: i, x: px, y: py, value: row.value });
+    }
+
+    const sel = gRaw.selectAll('g.raw-pt').data(points, d => d.key);
+    const selEnter = sel.enter().append('g').attr('class', 'raw-pt');
+    selEnter
+      .append('circle')
+      .attr('r', 3)
+      .style('fill', state.clusterFillColor)
+      .style('stroke', state.clusterStrokeColor)
+      .attr('fill-opacity', 0.25);
+    selEnter
+      .append('text')
+      .style('font-size', `${state.clusterTextSize}px`);
+
+    const selAll = selEnter.merge(sel);
+    selAll.attr('transform', d => `translate(${d.x},${d.y})`);
+    selAll.select('text')
+      .text(d => d.value)
+      .attr('text-anchor', 'middle')
+      .attr('dy', '0.35em')
+      .style('font-size', `${state.clusterTextSize}px`);
+
+    sel.exit().remove();
+  }
+
   // Handle window resize: recompute projection and redraw
   window.addEventListener('resize', () => {
     const newW = container.clientWidth || width;
@@ -261,7 +329,7 @@
     svg.attr('viewBox', `0 0 ${newW} ${newH}`);
     projection.translate([newW / 2, newH / 2]).scale(Math.min(newW, newH) * 1.15);
     gStates.selectAll('path').attr('d', geoPath);
-    renderClusters();
+    render();
   });
 })();
 
